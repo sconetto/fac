@@ -10,8 +10,8 @@ OBJECTS       := $(patsubst $(SOURCE_DIR)/%,$(OBJ_DIR)/%,$(SOURCES:.$(SOURCE_EXT
 
 INC           := -I $(INCLUDE_DIR)
 
-CXX           := gcc
-CXXFLAGS      := -W -Wall -ansi -pedantic -I.
+CXX           := g++
+CXXFLAGS      := -W -Wall -ansi -pedantic -I. -lm -std=c++11
 
 RM            := rm -f
 

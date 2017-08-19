@@ -15,7 +15,8 @@ int main(void) {
 
   collinearity = verify_collinearity(point_1, point_2, point_3);
   if (!collinearity) {
-    
+    circle = define_center(point_1, point_2, point_3);
+    print_radius(circle);
   } else {
     printf("Circulo nao viavel.\n");
   }

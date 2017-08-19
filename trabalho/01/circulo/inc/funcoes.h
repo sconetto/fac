@@ -11,8 +11,8 @@
 
 coordinates read_point();
 
-void print_radius();
+void print_radius(circle circle);
 
-void print_area();
+void print_area(circle circle);
 
 #endif

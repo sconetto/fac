@@ -12,4 +12,6 @@
 
 int verify_collinearity(coordinates a, coordinates b, coordinates c);
 
+circle verify_trinomial(double a, double b, double c);
+
 #endif

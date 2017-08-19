@@ -10,9 +10,12 @@ coordinates read_point() {
 }
 
 void print_radius(circle circle) {
+  printf("Raio: %.3f\n", circle.radius);
+  printf("Centro: (%.3f, %.3f).\n", circle.center.x, circle.center.y);
   return;
 }
 
 void print_area(circle circle) {
+  printf("Area: %.3f.\n", circle.area);
   return;
 }
