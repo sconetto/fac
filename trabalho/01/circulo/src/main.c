@@ -17,6 +17,7 @@ int main(void) {
   if (!collinearity) {
     circle = define_center(point_1, point_2, point_3);
     print_radius(circle);
+    print_area(circle);
   } else {
     printf("Circulo nao viavel.\n");
   }
