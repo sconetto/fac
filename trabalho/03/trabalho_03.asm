@@ -47,8 +47,8 @@ intervalo_positivo:
   li $v0, 4
   la $a0, test_1
   syscall
-  li $v0, 10                 # Carrega em $v0 o imediato 10 (terminar execução)
-  syscall                    # Chamada de sistema
+#  li $v0, 10                 # Carrega em $v0 o imediato 10 (terminar execução)
+#  syscall                    # Chamada de sistema
 
 
 intervalo_negativo:
@@ -57,11 +57,66 @@ intervalo_negativo:
   li $v0, 4
   la $a0, test_2
   syscall
-  li $v0, 10                 # Carrega em $v0 o imediato 10 (terminar execução)
-  syscall                    # Chamada de sistema
+#  li $v0, 10                 # Carrega em $v0 o imediato 10 (terminar execução)
+#  syscall                    # Chamada de sistema
 
 
 calc_arcsen:
+  # t0 = contador de iteração (número de temos - n)
+  add $t0, $zero, $zero      # Inicializando o registrador $t0 (os termos da série começam em zero e vão até inf)
+  # t1 = dividendo
+  # t2 = divisor
+  addi $t2, $zero, 1         # Inicializando o registrador $t1 (o divisor receberá uma série de multiplicações, logo inicializo com 1)
+  # t3 = reservado para calcular fatoriais
+  addi $t3, $zero, 1         # Inicializando o registrador $t3 (o fatorial receberá uma série de multiplicações, logo inicializo com 1)
+  # t4 = reservado para calcular potencias
+  addi $t4, $zero, 1         # Inicializando o registrador $t4 (a potência receberá uma série de multiplicações, logo inicializo com 1)
+  # t5 = auxiliar 1
+  # t6 = auxiliar 2
+  # t7 = auxiliar 3
+  
+  add.s $f14, $f4, $f12      # Copiando o valor lido de $f12 para $f14
+  addi $t0, $zero, $t0       # Criando um contador de iterações
+  mul $t5, $t0, 2            # Calculo o valor de 2n 
+  jal fatorial               # Pula para calcular o fatorial de 2n
+  add $t1, $zero, $t3        # Adiciona a $t1 o resultado do cálculo de fatorial
+  add $t5, $t0, $zero        # Calcula o valor de n
+  jal fatorial               # Pula para calcular o fatorial de n
+  mul $t2, $t2, $t5          # Multiplico no divisor o calculo de n!
+  mul $t2, $t2, $t2          # Como o meu divisor só tem n!, calculo o valor de (n!)^2
+  mul $t5, $t0, 2            # Volto a calcular o valor de 2n
+  addi $t5, $t5, 1           # Calculo o valor de 2n + 1
+  mul $t2, $t2, $t5          # Calculo no meu divisor a equação ((n!)^2)*(2n+1)
+  jal potencia_inteiro       # Para completar o meu divisor devo calcular 4^n, logo irei pular para a função potência e registrar em PC a chamada
+  mul $t2, $t2, $t4          # Calcula o resultado do divisor completo (((n!)^2)*(2n+1))*(4^n)
+  mul $t5, $t0, 2            # Volto a calcular o valor de 2n
+  addi $t5, $t5, 1           # Calculo o valor de 2n + 1
+  # TODO -> Calcular o valor de x ^ (2n + 1)
+  # TODO -> Calcular a divisão do dividendo com o divisor em ponto flutuante ($t1 e $t2)
+  # TODO -> Calcular o termo An a partir do resultado da divisão multiplicado por x ^ (2n + 1)
+  
+
+fatorial:
+  blez $t0, retorna_pc       # Verifico na chamada do fatorial se o meu termo é zero, caso sim eu retorno pois 0! = 1 e o registrador $t3 já terá 1 inicializado
+  mul $t3, $t3, $t5          # Multiplica o resultado pelo termo
+  addi $t5, $t5, -1          # Decrementa o termo para a próxima iteração
+  blez $t5, retorna_pc       # Caso $t5 seja zero ou menor volta pula para a função de retornar ao cálculo
+  j fatorial                 # Itera até a condição de parada
+  
+retorna_pc:
+  jr $ra                     # Retorna para onde o contador de programa (PC) estiver apontando 
+
+potencia_inteiro:
+  add $t6, $t0, $zero        # Copio em $t6 o expoente que é igual a n da iteração 
+  blez $t0, retorna_pc       # Verifico na chamada do potencial_inteiro se o meu termo é zero, caso sim eu retorno pois x^0 = 1 e o registrador $t4 já terá 1 inicializado
+
+loop_potencia_inteiro:
+  addi $t5, $zero, 4         # Coloco na minha auxiliar $t5 o valor 4
+  mul $t4, $t4, $t5          # $t4 vai receber o seu valor atual vezes 4 a fim de calcular a potência
+  addi $t6, $t6, -1          # Decremento o termo da potência
+  blez $t6, retorna_pc       # Caso o expoente seja zero pula para a função de retornar ao cálculo
+  j loop_potencia_inteiro    # Retorno ao loop
+  
 
 imprime_saida:
 

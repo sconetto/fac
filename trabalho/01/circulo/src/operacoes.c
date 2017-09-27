@@ -55,10 +55,10 @@ circle verify_trinomial(double a, double b, double c) {
   }
 
   if (a < 0) {
-    verifier[0] = 1;
+    verifier[0] = 0;
   }
   if (b < 0) {
-    verifier[1] = 1;
+    verifier[1] = 0;
   }
 
   /* printf("%.2f %.2f\n", aux[0], aux[1]); */
