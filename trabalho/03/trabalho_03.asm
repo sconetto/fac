@@ -55,6 +55,7 @@ intervalo_positivo:
 
 intervalo_negativo:
   c.le.s $f8, $f12           # Verifica se 1 negativo ($f8) é menor ou igual ao número lido ($f12)
+  mul.s $f26, $f26, $f8      # Caso o número seja negativo inverte a precisão para negativa 
   bc1f imprime_erro          # Caso a verificação acima seja falsa, o número é menor que -1 e está fora do intervalo, pule para imprime_erro
   j calc_arcsen              # O número é válido, inicia o cálculo de arcsen
 #  li $v0, 4
@@ -123,7 +124,7 @@ loop_calc_arcsen:
   div.s $f22, $f22, $f18     # Divido o meu registrador $f22 (termo an que contém o dividendo) o valor do divisor
   mul.s $f22, $f22, $f20     # Multiplico o meu registrador $f22 (termo an que contem o resultado da divisão) o valor de x ^ (2n + 1)
   add.s $f24, $f24, $f22     # Adiciono ao meu registrador $f24 o valor dele com o do termo an.
-  c.le.s $f22, $f26          # Verifica se o termo an é menor que a precisão desejada
+  jal compara_precisao
   bc1t imprime_saida         # Caso o termo seja menor que a precisão, termina a execução e imprime a saída
   bgtu $t0, 14, imprime_saida # Caso tenha iterado mais de 20 termos, termine a execução
   addi $t0, $t0, 1           # Adiciona um ao iterador
@@ -163,6 +164,19 @@ loop_fatorial_float:
   blez $t5, retorna_pc       # Caso $t5 seja zero ou menor volta para a função de calcular o arcsen
   j loop_fatorial_float      # Itera até a condição de parada
 
+compara_precisao:
+  c.le.s $f26, $f4           # Se minha precisão for negativa eu seto a flag true, se não eu seto false
+  bc1t compara_negativo      # Se a flag for true comparo negativo
+  bc1f compara_positivo      # Se a flag for false comparo positivo
+  
+compara_negativo:
+  c.le.s $f26, $f22          # Verifica se o termo an é menor que a precisão desejada
+  j retorna_pc               # Retorna a chamada da função
+  
+compara_positivo:
+  c.le.s $f22, $f26          # Verifica se o termo an é menor que a precisão desejada
+  j retorna_pc               # Retorna a chamada da função
+  
 retorna_pc:
   jr $ra                     # Retorna para onde o contador de programa (PC) estiver apontando 
 
