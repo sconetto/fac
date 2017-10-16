@@ -2,7 +2,7 @@
 .data
 
 msg_1: .asciiz "\nDigite o valor a ser calculado o arcoseno: \n"
-msg_2: .asciiz "\nO arcoseno de "
+msg_2: .asciiz "\nO arcseno de "
 msg_3: .asciiz " é "
 msg_4: .asciiz ". Usamos "
 msg_5: .asciiz " termos da serie.\n"
@@ -31,10 +31,7 @@ le_float:
   li $v0, 6                  # Carrega o imediato 6 (leitura de float) no registrador $v0
   syscall                    # Chamada de sistema (o float lido será colocado em $f0)
 
-
   add.s $f12, $f0, $f4       # Adiciona o valor lido que está em $f0 em $f12, pois $f4 é zero
-#  li $v0, 2                 # Carrega o imediato 2 (impressão de float) no registrador $v0
-#  syscall                   # Chamada de sistema
   
 verifica_intervalo:
   c.lt.s $f12, $f4           # Verifica se o número lido que está em $f12 é menor que zero ($f4)
@@ -46,24 +43,12 @@ intervalo_positivo:
   c.le.s $f12, $f6           # Verifica se o número lido ($f12) é menor ou igual a 1 positivo ($f6)
   bc1f imprime_erro          # Caso a verificação acima seja falsa, o número é maior que 1 e está fora do intervalo, pule para imprime_erro
   j calc_arcsen              # O número é válido, inicia o cálculo de arcsen
-#  li $v0, 4
-#  la $a0, test_1
-#  syscall
-#  li $v0, 10                 # Carrega em $v0 o imediato 10 (terminar execução)
-#  syscall                    # Chamada de sistema
-
 
 intervalo_negativo:
   c.le.s $f8, $f12           # Verifica se 1 negativo ($f8) é menor ou igual ao número lido ($f12)
   mul.s $f26, $f26, $f8      # Caso o número seja negativo inverte a precisão para negativa 
   bc1f imprime_erro          # Caso a verificação acima seja falsa, o número é menor que -1 e está fora do intervalo, pule para imprime_erro
   j calc_arcsen              # O número é válido, inicia o cálculo de arcsen
-#  li $v0, 4
-#  la $a0, test_2
-#  syscall
-#  li $v0, 10                 # Carrega em $v0 o imediato 10 (terminar execução)
-#  syscall                    # Chamada de sistema
-
 
 calc_arcsen:
   # t0 = contador de iteração (número de temos - n)
@@ -92,31 +77,21 @@ loop_calc_arcsen:
   mul $t5, $t0, 2            # Calculo o valor de 2n 
   jal fatorial_float         # Pula para calcular o fatorial de 2n
   mul.s $f16, $f16, $f29     # Calcula o dividendo da minha operação
-#  add $t1, $zero, $t3        # Adiciona a $t1 o resultado do cálculo de fatorial
-#  addi $t3, $zero, 1         # Reinicializo a auxiliar $t3 de calcular fatoriais
   add $t5, $t0, $zero        # Calcula o valor de n
   jal fatorial_float         # Pula para calcular o fatorial de n (float)
   mul.s $f18, $f18, $f29     # Multiplico no divisor o calculo de n!
-  mul.s $f18, $f18, $f18      # Como o meu divisor só tem n!, calculo o valor de (n!)^2
-#  mul $t2, $t2, $t3          # Multiplico no divisor o calculo de n!
-#  mul $t2, $t2, $t2          # Como o meu divisor só tem n!, calculo o valor de (n!)^2
+  mul.s $f18, $f18, $f18     # Como o meu divisor só tem n!, calculo o valor de (n!)^2
   mul $t5, $t0, 2            # Volto a calcular o valor de 2n
   addi $t5, $t5, 1           # Calculo o valor de 2n + 1
   mtc1 $t5, $f29             # Movo o valor de 2n + 1 para o Coproc 1
   cvt.s.w $f29, $f29         # Convertendo para float o valor de $f29
   mul.s $f18, $f18, $f29     # Calculo no meu divisor a equação ((n!)^2)*(2n+1)
-#  mul $t2, $t2, $t5          # Calculo no meu divisor a equação ((n!)^2)*(2n+1)
   jal potencia_inteiro       # Para completar o meu divisor devo calcular 4^n, logo irei pular para a função potência e registrar em PC a chamada
   mtc1 $t4, $f29             # Pego o resultado de 4^n e coloco em $f29
   cvt.s.w $f29, $f29         # Converto $f29 para float
   mul.s $f18, $f18, $f29     # Calcula o resultado do divisor completo (((n!)^2)*(2n+1))*(4^n)
-#  mul $t2, $t2, $t4          # Calcula o resultado do divisor completo (((n!)^2)*(2n+1))*(4^n)
   mul $t5, $t0, 2            # Volto a calcular o valor de 2n
   addi $t5, $t5, 1           # Calculo o valor de 2n + 1
-#  mtc1 $t1, $f16             # Movendo o dividendo de $t1 para $f16
-#  cvt.s.w $f16, $f16         # Convertendo para float o valor de $f16
-#  mtc1 $t2, $f18             # Movendo o divisor de $t2 para $f18
-#  cvt.s.w $f18, $f18         # Convertendo para float o valor de $f18
   jal potencia_x             # Para calcular o valor de x ^ (2n + 1)
   add.s $f20, $f4, $f2       # Copiando para o registrador $f20 o valor calculado na potencia_x
   # A partir de agora irei calcular o termo an da minha série e adicionar a soma final
@@ -126,7 +101,7 @@ loop_calc_arcsen:
   add.s $f24, $f24, $f22     # Adiciono ao meu registrador $f24 o valor dele com o do termo an.
   jal compara_precisao
   bc1t imprime_saida         # Caso o termo seja menor que a precisão, termina a execução e imprime a saída
-  bgtu $t0, 14, imprime_saida # Caso tenha iterado mais de 20 termos, termine a execução
+  bgt $t0,14, imprime_saida  # Caso tenha iterado mais de 20 termos, termine a execução
   addi $t0, $t0, 1           # Adiciona um ao iterador
   addi $t1, $zero, 1         # Reinicializo a auxiliar $t1 de calcular o dividendo
   addi $t2, $zero, 1         # Reinicializo a auxiliar $t2 de calcular o divisor
