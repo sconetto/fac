@@ -5,32 +5,32 @@ msg_1: .asciiz "Escreva a String que deseja calcular o CRC32: "
 msg_2: .asciiz "String de entrada: "
 msg_crc32: .asciiz "CRC32: "
 buffer: .space 16
-polynomial: .word 0xebd88320
-# 04c11db7 - ebd88320
+polynomial: .word 0xEDB88320
 
 # Seção para a execução do processador
 .text
 
 le_string:
-	la $a0, msg_1                         # Carrega em $a0 a mensagem
-	li $v0, 4                                 # Carrega o imediato 4 (print string) no registrador $v0
+	la $a0, msg_1  # Carrega em $a0 a mensagem
+	li $v0, 4  # Carrega o imediato 4 (print string) no registrador $v0
 	syscall
      
-	li $v0, 8 # Carrega o imediato 8 (read string) no registrador $v0
-	la $a0, buffer # Carrega o tamanho em bytes no endereço
-	li $a1, 16 # Atribui o espaço em bytes para a string
-	move $t0, $a0 # Salva a string em $t0
+	li $v0, 8  # Carrega o imediato 8 (read string) no registrador $v0
+	la $a0, buffer  # Carrega o tamanho em bytes no endereço
+	li $a1, 16  # Atribui o espaço em bytes para a string
+	move $t0, $a0  # Salva a string em $t0
 	syscall
 
 calc_crc32:
-	lw $t1, polynomial #Carrega o polinomio do CRC32 no registrador $t1
-	add $t3, $zero, $zero # Inicio o valor de $t3 com zero (Contador da string)
+	lw $t1, polynomial  # Carrega o polinomio do CRC32 no registrador $t1
+	add $t3, $zero, $zero  # Inicio o valor de $t3 com zero (Contador da string)
 	addi $t4, $zero, 8 #Inicio o valor de $t4 com zero (Auxiliar no cálculo do CRC32)
-	nor $t6, $zero, $zero # Inicio o valor do CRC32 com 0xFFFFFFFF
+	add $t6, $zero, 0xFFFFFFFF # Inicio o valor do CRC32 com 0xFFFFFFFF
 	
 loop_crc:
 	lb $t2, 0($t0) #Carrego byte atual da mensagem
-	beqz $t2, imprime_saida #Caso o byte seja zero (não tem conteúdo/final da string) pulo para o imprime_saida 
+	beqz $t2, imprime_saida #Caso o byte seja zero (não tem conteúdo/final da string) pulo para o imprime_saida
+	beq $t2, 0x0a, imprime_saida  # Caso o byte seja um linefeed pule para o imprimir saída
 	xor $t6, $t6, $t2 # CRC = CRC ^ Byte (XOR do CRC com o Byte)
 	jal loop_aux # Pulo para o loop auxiliar de cálculo do CRC32
 	add $t0, $t0, 1 # Incremeto o endereço
@@ -65,4 +65,3 @@ imprime_saida:
 	
 	li $v0, 10 # Carrego o imedito 10 (exit) em $v0
 	syscall
-	
